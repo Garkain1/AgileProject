@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.projects.models import Project
+from ..models import Project
 
 
 class AllProjectsSerializer(serializers.ModelSerializer):
@@ -21,3 +21,11 @@ class CreateProjectSerializer(serializers.ModelSerializer):
                 "Description must be at least 30 characters long"
             )
         return value
+
+
+class ProjectDetailSerializer(serializers.ModelSerializer):
+    count_of_files = serializers.IntegerField(source='files.count', read_only=True)
+
+    class Meta:
+        model = Project
+        fields = ('id', 'name', 'description', 'count_of_files')

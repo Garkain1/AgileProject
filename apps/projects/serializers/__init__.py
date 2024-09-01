@@ -1,1 +1,1 @@
-from .project_serializers import AllProjectsSerializer, CreateProjectSerializer
+from .project_serializers import AllProjectsSerializer, CreateProjectSerializer, ProjectDetailSerializer

@@ -1,1 +1,1 @@
-from .project_views import ProjectsListAPIView
+from .project_views import ProjectsListAPIView, ProjectDetailAPIView
