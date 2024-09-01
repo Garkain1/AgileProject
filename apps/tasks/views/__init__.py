@@ -1,1 +1,1 @@
-from .tag_views import TagListAPIView
+from .tag_views import TagListAPIView, TagDetailAPIView
