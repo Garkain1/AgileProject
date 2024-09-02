@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from django.conf import settings
 
-ALLOWED_EXTENSIONS = ['.csv', '.doc', '.pdf', '.xlsx', '.py']
+ALLOWED_EXTENSIONS = ['.csv', '.doc', '.pdf', '.xlsx']
 
 
 def check_extension(filename):
@@ -19,9 +19,12 @@ def check_file_size(file, required_size=2):
     return True
 
 
-def create_file_path(file_name):
+def create_file_path(project_name, file_name):
     new_file_name, file_ext = file_name.split('.')
-    file_path = os.path.join(settings.MEDIA_ROOT, settings.PROJECTS_FILES_PATH, f"{new_file_name}.{file_ext}")
+    sanitized_project_name = project_name.replace(' ', '_')
+    sanitized_file_name = new_file_name.replace(' ', '_')
+    file_path = os.path.join(settings.MEDIA_ROOT, settings.PROJECTS_FILES_PATH, sanitized_project_name,
+                             f"{sanitized_file_name}.{file_ext}")
     return file_path
 
 

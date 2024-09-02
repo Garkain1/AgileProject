@@ -4,9 +4,14 @@ from ..utils import check_extension, create_file_path, check_file_size, save_fil
 
 
 class AllProjectFilesSerializer(serializers.ModelSerializer):
+    projects = serializers.SerializerMethodField()
+
     class Meta:
         model = ProjectFile
-        fields = ('id', 'file_name')
+        fields = ('id', 'file_name', 'projects')
+
+    def get_projects(self, obj):
+        return [project.name for project in obj.projects.all()]
 
 
 class CreateProjectFileSerializer(serializers.ModelSerializer):
@@ -22,8 +27,9 @@ class CreateProjectFileSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        file_path = create_file_path(file_name=validated_data['file_name'])
+        project = self.context.get('project')
         raw_file = self.context.get('raw_file')
+        file_path = create_file_path(project_name=project.name, file_name=validated_data['file_name'])
 
         if check_file_size(file=raw_file):
             save_file(file_path=file_path, file_content=raw_file)
