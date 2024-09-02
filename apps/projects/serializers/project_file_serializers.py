@@ -37,3 +37,14 @@ class CreateProjectFileSerializer(serializers.ModelSerializer):
             return ProjectFile.objects.create(**validated_data)
         else:
             raise serializers.ValidationError("File size is too large (2 MB as maximum).")
+
+
+class ProjectFileDetailSerializer(serializers.ModelSerializer):
+    projects = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProjectFile
+        fields = ('id', 'file_name', 'created_at', 'projects')
+
+    def get_projects(self, obj):
+        return [project.name for project in obj.projects.all()]
