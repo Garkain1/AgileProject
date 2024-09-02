@@ -1,6 +1,5 @@
 from apps.projects.models import Project
 from apps.projects.serializers import ProjectShortInfoSerializer
+from apps.users.models import User
 
-if __name__ == "__main__":
-    Project()
-    ProjectShortInfoSerializer()
+__all__ = ['User', 'Project', 'ProjectShortInfoSerializer']

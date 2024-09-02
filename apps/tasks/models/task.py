@@ -1,6 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
-from ..dependencies import Project
+from ..dependencies import Project, User
 from ..choices import Statuses, Priority
 from ..utils import calculate_end_of_month
 
