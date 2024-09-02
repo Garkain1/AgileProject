@@ -3,24 +3,34 @@ from rest_framework import serializers
 from django.utils import timezone
 from ..models import Task, Tag
 from ..choices import Priority
-from ..dependencies import Project
+from ..dependencies import Project, ProjectShortInfoSerializer
 
 
 class AllTasksSerializer(serializers.ModelSerializer):
     project = serializers.SlugRelatedField(read_only=True, slug_field='name')
     assignee = serializers.SlugRelatedField(read_only=True, slug_field='email')
+    status = serializers.CharField(source='get_status_display')
 
     class Meta:
         model = Task
         fields = ('id', 'name', 'status', 'priority', 'project', 'assignee', 'deadline')
 
 
-class CreateTaskSerializer(serializers.ModelSerializer):
+class CreateUpdateTaskSerializer(serializers.ModelSerializer):
     project = serializers.SlugRelatedField(slug_field='name', queryset=Project.objects.all())
 
     class Meta:
         model = Task
-        fields = ('name', 'description', 'priority', 'project', 'tags', 'deadline')
+        fields = ('name', 'description', 'priority', 'project', 'tags', 'status', 'deadline')
+
+    def update(self, instance, validated_data):
+        tags = validated_data.pop('tags', [])
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if tags:
+            instance.tags.set(tags)
+        instance.save()
+        return instance
 
     def validate_name(self, value: str) -> str:
         if len(value) < 10:
@@ -61,3 +71,13 @@ class CreateTaskSerializer(serializers.ModelSerializer):
             task.tags.add(tag)
         task.save()
         return task
+
+
+class TaskDetailSerializer(serializers.ModelSerializer):
+    project = ProjectShortInfoSerializer()
+    tags = serializers.StringRelatedField(many=True)
+    status = serializers.CharField(source='get_status_display')
+
+    class Meta:
+        model = Task
+        exclude = ('updated_at', 'deleted_at')
