@@ -1,1 +1,1 @@
-from .user_views import UserListGenericView
+from .user_views import UserListGenericView, RegisterUserGenericView
