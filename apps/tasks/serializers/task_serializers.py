@@ -3,7 +3,7 @@ from rest_framework import serializers
 from django.utils import timezone
 from ..models import Task, Tag
 from ..choices import Priority
-from ..dependencies import Project, ProjectShortInfoSerializer
+from ..dependencies import Project, ProjectShortInfoSerializer, User
 
 
 class AllTasksSerializer(serializers.ModelSerializer):
@@ -18,10 +18,15 @@ class AllTasksSerializer(serializers.ModelSerializer):
 
 class CreateUpdateTaskSerializer(serializers.ModelSerializer):
     project = serializers.SlugRelatedField(slug_field='name', queryset=Project.objects.all())
+    assignee = serializers.SlugRelatedField(
+        slug_field='email',
+        queryset=User.objects.all(),
+        required=False
+    )
 
     class Meta:
         model = Task
-        fields = ('name', 'description', 'priority', 'project', 'tags', 'status', 'deadline')
+        fields = ('name', 'description', 'priority', 'project', 'tags', 'status', 'assignee', 'deadline')
 
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags', [])
