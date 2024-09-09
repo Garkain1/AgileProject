@@ -1,9 +1,10 @@
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
+from rest_framework.exceptions import NotFound
 from ..models import User
-from ..serializers import UserListSerializer, RegisterUserSerializer
+from ..serializers import UserListSerializer, RegisterUserSerializer, UserDetailSerializer
 
 
 class UserListGenericView(ListAPIView):
@@ -38,3 +39,15 @@ class RegisterUserGenericView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UserDetailView(RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserDetailSerializer
+
+    def get_object(self):
+        user_id = self.kwargs.get('pk')
+        try:
+            return User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            raise NotFound(detail="User not found")

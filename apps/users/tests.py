@@ -2,6 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from .models import User
+from .dependencies import Project
 
 
 class UserListGenericViewTest(APITestCase):
@@ -183,3 +184,44 @@ class RegisterUserGenericViewTest(APITestCase):
         self.assertIn('position', response.data)
         self.assertEqual(str(response.data['position'][0]), '"InvalidPosition" is not a valid choice.')
 
+
+class UserRetrieveTest(APITestCase):
+    def setUp(self):
+        # Создаем проект для пользователя
+        self.project = Project.objects.create(name="AgileProject")
+        # Создаем тестового пользователя
+        self.user = User.objects.create(
+            username="user1",
+            first_name="John",
+            last_name="Doe",
+            email="user1@example.com",
+            phone="+123456789",
+            position="Developer",
+            project=self.project
+        )
+
+    def test_get_user_by_id(self):
+        """Тестируем получение информации о пользователе по ID"""
+        url = reverse('user-detail', args=[self.user.id])
+        response = self.client.get(url)
+
+        # Проверяем, что запрос успешен
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Проверяем данные в ответе
+        self.assertEqual(response.data['username'], 'user1')
+        self.assertEqual(response.data['first_name'], 'John')
+        self.assertEqual(response.data['last_name'], 'Doe')
+        self.assertEqual(response.data['email'], 'user1@example.com')
+        self.assertEqual(response.data['phone'], '+123456789')
+        self.assertEqual(response.data['position'], 'Developer')
+        self.assertEqual(response.data['project'], 'AgileProject')
+
+    def test_get_nonexistent_user(self):
+        """Тестируем получение информации о несуществующем пользователе"""
+        url = reverse('user-detail', args=[999])  # Несуществующий ID
+        response = self.client.get(url)
+
+        # Проверяем, что запрос вернет 404
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data['detail'], 'User not found')

@@ -70,3 +70,19 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    project = serializers.StringRelatedField()
+
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'phone',
+            'position',
+            'project'
+        )
