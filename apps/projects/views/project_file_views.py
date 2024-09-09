@@ -1,9 +1,9 @@
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.generics import RetrieveDestroyAPIView
-from rest_framework.generics import ListCreateAPIView
-from rest_framework.generics import get_object_or_404
+from rest_framework.generics import RetrieveDestroyAPIView, ListCreateAPIView, get_object_or_404
+from rest_framework.views import APIView
+from django.http import FileResponse
 from ..models import ProjectFile, Project
 from ..serializers import AllProjectFilesSerializer, CreateProjectFileSerializer, ProjectFileDetailSerializer
 from ..utils import delete_file
@@ -66,3 +66,16 @@ class ProjectFileDetailGenericView(RetrieveDestroyAPIView):
             return Response({"message": "File deleted successfully"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DownloadProjectFileView(APIView):
+    def get_object(self):
+        return get_object_or_404(ProjectFile, pk=self.kwargs['pk'])
+
+    def get(self, request: Request, *args, **kwargs) -> FileResponse:
+        project_file = self.get_object()
+        file_handle = project_file.file_path.open()
+
+        response = FileResponse(file_handle, content_type='application/octet-stream')
+        response['Content-Disposition'] = f'attachment; filename="{project_file.file_name}"'
+        return response
